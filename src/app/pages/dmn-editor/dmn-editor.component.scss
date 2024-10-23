@@ -1,0 +1,25 @@
+#editor{
+    width: 80vw;
+    height: 92vh;
+}
+
+.modeller{
+    display: flex;
+
+}
+
+#dropdown{
+    display: none;
+    background: white;
+    z-index: 10;
+    width: 100px;
+    height: 100px;
+}
+
+.user{
+    height: 20px;
+}
+
+#panel{
+    width: 19vw;
+}

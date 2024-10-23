@@ -1,0 +1,15 @@
+<div style="text-align:center; margin-top: 50px;">
+  <h2>Simple Web Page with Buttons and Text Field</h2>
+
+  <!-- First Button -->
+  <button onclick="location.href = './editor'">First Button</button>
+
+  <!-- Text Field and Second Button -->
+  <div style="margin-top: 20px;">
+    <!-- <input [(ngModel)]="userInput" placeholder="Enter some text" /> -->
+    <button onclick="location.href = './dmn-editor'">Submit</button>
+  </div>
+
+  <!-- Display submitted text -->
+  <p *ngIf="submittedText">You entered: {{ submittedText }}</p>
+</div>

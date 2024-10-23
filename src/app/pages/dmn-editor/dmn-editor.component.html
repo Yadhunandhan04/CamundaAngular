@@ -1,0 +1,10 @@
+<div class="modeller" (click)="onClick($event)">
+    <div id="editor"></div>
+    <div id="panel"></div>
+</div>
+<div id="dropdown" #dropdown>
+    <div *ngFor="let user of users" (click)="selectUser(user)" class="user">{{user}}</div>
+</div>
+<button (click)="download()">download</button>
+<button (click)="newDiagram()">New Diagram</button>
+<button (click)="showFlow()">Show Flow</button>

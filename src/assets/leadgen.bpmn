@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1gdliox" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.16.0">
+  <bpmn:process id="leadgen" name="Lead Generation" isExecutable="true">
+    <bpmn:startEvent id="StartEventCustomerOnboardingSimple" name="Start&#10;">
+      <bpmn:extensionElements>
+        <zeebe:properties>
+          <zeebe:property name="camundaModeler:exampleOutputJson" value="{&#10;  &#34;customerName&#34;: &#34;bernd&#34;,&#10; &#34;customerEmail&#34;: &#34;noreply@camunda.com&#34;&#10;}" />
+        </zeebe:properties>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_015dit6</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="duplicateLeadCheck" name="Duplicate Lead Check">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="restApi" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;http://localhost:8079/api/duplicateLeadCheck&#34;" target="url" />
+          <zeebe:input source="=&#34;POST&#34;" target="method" />
+          <zeebe:input source="=null" target="output" />
+          <zeebe:output source="=output" target="duplicateLeadCheck" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_015dit6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cxim98</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="GatewayOrderAccepted" name="Order accepted?" default="SequenceFlowOrderAcceptedNo">
+      <bpmn:incoming>Flow_0cxim98</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlowOrderAcceptedNo</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlowOrderAcceptedYes</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlowOrderAcceptedNo" name="No" sourceRef="GatewayOrderAccepted" targetRef="Activity_1kfbzan" />
+    <bpmn:sequenceFlow id="SequenceFlowOrderAcceptedYes" name="Yes" sourceRef="GatewayOrderAccepted" targetRef="Activity_1p3hdmy">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=( duplicateLeadCheck=true )</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="EndEventProcessed" name="Lead Rejected">
+      <bpmn:incoming>Flow_0p9fr70</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_015dit6" sourceRef="StartEventCustomerOnboardingSimple" targetRef="duplicateLeadCheck" />
+    <bpmn:sequenceFlow id="Flow_0cxim98" sourceRef="duplicateLeadCheck" targetRef="GatewayOrderAccepted" />
+    <bpmn:sequenceFlow id="Flow_0if4hze" sourceRef="Activity_1p3hdmy" targetRef="Gateway_0scjm6r" />
+    <bpmn:userTask id="Activity_1p3hdmy" name="Duplicate Lead User">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=duplicateLeadCheckUser" target="duplicateLeadCheckUser" />
+        </zeebe:ioMapping>
+        <zeebe:assignmentDefinition assignee="=assignee" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlowOrderAcceptedYes</bpmn:incoming>
+      <bpmn:outgoing>Flow_0if4hze</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0p9fr70" name="No" sourceRef="Gateway_0scjm6r" targetRef="EndEventProcessed">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=duplicateLeadCheckUser=false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_1kfbzan" name="Blacklist Amlock Check">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="restApi" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;http://localhost:8079/api/blackListAmlockCheck&#34;" target="url" />
+          <zeebe:input source="=&#34;POST&#34;" target="method" />
+          <zeebe:input source="=null" target="output" />
+          <zeebe:output source="=output" target="blacklistAmlockCheck" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlowOrderAcceptedNo</bpmn:incoming>
+      <bpmn:incoming>Flow_1k7olk9</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hd03o5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_07b0njq" default="Flow_05nbbvu">
+      <bpmn:incoming>Flow_1hd03o5</bpmn:incoming>
+      <bpmn:outgoing>Flow_05nbbvu</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1u1zsy2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1hd03o5" sourceRef="Activity_1kfbzan" targetRef="Gateway_07b0njq" />
+    <bpmn:userTask id="amlockCheck" name="Amlock Decision Check">
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition assignee="blacklist-approver" candidateGroups="blacklist-approver" candidateUsers="blacklist-approver" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=blacklistUserAmlockCheck" target="blacklistUserAmlockCheck" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_05nbbvu</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jru9t6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_05nbbvu" name="Yes" sourceRef="Gateway_07b0njq" targetRef="amlockCheck" />
+    <bpmn:exclusiveGateway id="Gateway_138j1d3" default="Flow_15rewd5">
+      <bpmn:incoming>Flow_0jru9t6</bpmn:incoming>
+      <bpmn:outgoing>Flow_15rewd5</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1r3k7os</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0jru9t6" sourceRef="amlockCheck" targetRef="Gateway_138j1d3" />
+    <bpmn:serviceTask id="Activity_1d2wq5c" name="Lead ID Generation">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="generateLead" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=output" target="leadId" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_15rewd5</bpmn:incoming>
+      <bpmn:incoming>Flow_1u1zsy2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0nb3ffz</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_15rewd5" name="Yes" sourceRef="Gateway_138j1d3" targetRef="Activity_1d2wq5c" />
+    <bpmn:endEvent id="Event_13i4x3n" name="Lead Rejected">
+      <bpmn:incoming>Flow_1r3k7os</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1r3k7os" name="No" sourceRef="Gateway_138j1d3" targetRef="Event_13i4x3n">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=blacklistUserAmlockCheck = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1u1zsy2" name="No" sourceRef="Gateway_07b0njq" targetRef="Activity_1d2wq5c">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=blacklistAmlockCheck = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Activity_0du3xgq" name="Follow up Queue">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=output" target="conversion" />
+        </zeebe:ioMapping>
+        <zeebe:assignmentDefinition assignee="=employeeCode" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0nb3ffz</bpmn:incoming>
+      <bpmn:incoming>Flow_14pbsv2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0azxtnp</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0nb3ffz" sourceRef="Activity_1d2wq5c" targetRef="Activity_0du3xgq" />
+    <bpmn:exclusiveGateway id="Gateway_1u6f1zn" default="Flow_11rx00t">
+      <bpmn:incoming>Flow_0azxtnp</bpmn:incoming>
+      <bpmn:outgoing>Flow_14pbsv2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_11rx00t</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0azxtnp" sourceRef="Activity_0du3xgq" targetRef="Gateway_1u6f1zn" />
+    <bpmn:sequenceFlow id="Flow_14pbsv2" name="No" sourceRef="Gateway_1u6f1zn" targetRef="Activity_0du3xgq">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=conversion = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_07685ch" name="Lead Conversion">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="convertLead" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_11rx00t</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hjjpms</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_11rx00t" name="Yes" sourceRef="Gateway_1u6f1zn" targetRef="Activity_07685ch" />
+    <bpmn:endEvent id="Event_0qmwwtk" name="Lead Created">
+      <bpmn:incoming>Flow_0hjjpms</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0hjjpms" sourceRef="Activity_07685ch" targetRef="Event_0qmwwtk" />
+    <bpmn:exclusiveGateway id="Gateway_0scjm6r" default="Flow_1k7olk9">
+      <bpmn:incoming>Flow_0if4hze</bpmn:incoming>
+      <bpmn:outgoing>Flow_0p9fr70</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1k7olk9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1k7olk9" name="Yes" sourceRef="Gateway_0scjm6r" targetRef="Activity_1kfbzan" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="leadgen">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEventCustomerOnboardingSimple">
+        <dc:Bounds x="82" y="109" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="89" y="152" width="25" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1raexvc_di" bpmnElement="duplicateLeadCheck">
+        <dc:Bounds x="170" y="87" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_19ecd5n_di" bpmnElement="GatewayOrderAccepted" isMarkerVisible="true">
+        <dc:Bounds x="445" y="102" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="430" y="78" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_11d1rd0_di" bpmnElement="EndEventProcessed">
+        <dc:Bounds x="842" y="109" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="827" y="152" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1416cky_di" bpmnElement="Activity_1p3hdmy">
+        <dc:Bounds x="590" y="87" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_162se9h_di" bpmnElement="Activity_1kfbzan">
+        <dc:Bounds x="420" y="260" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_07b0njq_di" bpmnElement="Gateway_07b0njq" isMarkerVisible="true">
+        <dc:Bounds x="445" y="405" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1gw1kfq_di" bpmnElement="amlockCheck">
+        <dc:Bounds x="560" y="390" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_138j1d3_di" bpmnElement="Gateway_138j1d3" isMarkerVisible="true">
+        <dc:Bounds x="745" y="405" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1d2wq5c_di" bpmnElement="Activity_1d2wq5c">
+        <dc:Bounds x="420" y="520" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_13i4x3n_di" bpmnElement="Event_13i4x3n">
+        <dc:Bounds x="842" y="412" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="826" y="455" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0du3xgq_di" bpmnElement="Activity_0du3xgq">
+        <dc:Bounds x="420" y="680" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1u6f1zn_di" bpmnElement="Gateway_1u6f1zn" isMarkerVisible="true">
+        <dc:Bounds x="445" y="845" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_07685ch_di" bpmnElement="Activity_07685ch">
+        <dc:Bounds x="420" y="990" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0qmwwtk_di" bpmnElement="Event_0qmwwtk">
+        <dc:Bounds x="452" y="1102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="439" y="1145" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0scjm6r_di" bpmnElement="Gateway_0scjm6r" isMarkerVisible="true">
+        <dc:Bounds x="745" y="102" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0zlu1eg_di" bpmnElement="SequenceFlowOrderAcceptedNo">
+        <di:waypoint x="470" y="152" />
+        <di:waypoint x="470" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="478" y="235" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0amyhlw_di" bpmnElement="SequenceFlowOrderAcceptedYes">
+        <di:waypoint x="495" y="127" />
+        <di:waypoint x="590" y="127" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="539" y="109" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_015dit6_di" bpmnElement="Flow_015dit6">
+        <di:waypoint x="118" y="127" />
+        <di:waypoint x="170" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cxim98_di" bpmnElement="Flow_0cxim98">
+        <di:waypoint x="270" y="127" />
+        <di:waypoint x="445" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0if4hze_di" bpmnElement="Flow_0if4hze">
+        <di:waypoint x="690" y="127" />
+        <di:waypoint x="745" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0p9fr70_di" bpmnElement="Flow_0p9fr70">
+        <di:waypoint x="795" y="127" />
+        <di:waypoint x="842" y="127" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="811" y="109" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hd03o5_di" bpmnElement="Flow_1hd03o5">
+        <di:waypoint x="470" y="340" />
+        <di:waypoint x="470" y="405" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05nbbvu_di" bpmnElement="Flow_05nbbvu">
+        <di:waypoint x="495" y="430" />
+        <di:waypoint x="560" y="430" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="519" y="412" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jru9t6_di" bpmnElement="Flow_0jru9t6">
+        <di:waypoint x="660" y="430" />
+        <di:waypoint x="745" y="430" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15rewd5_di" bpmnElement="Flow_15rewd5">
+        <di:waypoint x="770" y="455" />
+        <di:waypoint x="770" y="560" />
+        <di:waypoint x="520" y="560" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="776" y="505" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1r3k7os_di" bpmnElement="Flow_1r3k7os">
+        <di:waypoint x="795" y="430" />
+        <di:waypoint x="842" y="430" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="811" y="412" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1u1zsy2_di" bpmnElement="Flow_1u1zsy2">
+        <di:waypoint x="470" y="455" />
+        <di:waypoint x="470" y="520" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="478" y="485" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0nb3ffz_di" bpmnElement="Flow_0nb3ffz">
+        <di:waypoint x="470" y="600" />
+        <di:waypoint x="470" y="680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0azxtnp_di" bpmnElement="Flow_0azxtnp">
+        <di:waypoint x="470" y="760" />
+        <di:waypoint x="470" y="845" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14pbsv2_di" bpmnElement="Flow_14pbsv2">
+        <di:waypoint x="495" y="870" />
+        <di:waypoint x="570" y="870" />
+        <di:waypoint x="570" y="720" />
+        <di:waypoint x="520" y="720" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="579" y="792" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11rx00t_di" bpmnElement="Flow_11rx00t">
+        <di:waypoint x="470" y="895" />
+        <di:waypoint x="470" y="990" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="476" y="940" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hjjpms_di" bpmnElement="Flow_0hjjpms">
+        <di:waypoint x="470" y="1070" />
+        <di:waypoint x="470" y="1102" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1k7olk9_di" bpmnElement="Flow_1k7olk9">
+        <di:waypoint x="770" y="152" />
+        <di:waypoint x="770" y="300" />
+        <di:waypoint x="520" y="300" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="776" y="223" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

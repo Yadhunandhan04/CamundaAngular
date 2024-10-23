@@ -1,1 +1,44 @@
 /* You can add global styles to this file, and also import other style files */
+// @import "bpmn-js/dist/assets/bpmn-font/font/bpmn.eot";
+// @import "bpmn-js/dist/assets/bpmn-font/font/bpmn.svg";
+// @import "bpmn-js/dist/assets/bpmn-font/font/bpmn.ttf";
+// @import "bpmn-js/dist/assets/bpmn-font/font/bpmn.woff";
+// @import "bpmn-js/dist/assets/bpmn-font/font/bpmn.woff2";
+@import "bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css";
+@import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
+@import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
+@import "bpmn-js/dist/assets/bpmn-js.css";
+@import "bpmn-js/dist/assets/diagram-js.css";
+@import "@bpmn-io/properties-panel/dist/assets/properties-panel.css";
+@import "dmn-js/dist/assets/dmn-font/css/dmn.css";
+@import "dmn-js/dist/assets/dmn-js-shared.css";
+@import "dmn-js/dist/assets/dmn-js-drd.css";
+@import "dmn-js/dist/assets/dmn-js-decision-table.css";
+@import "dmn-js/dist/assets/dmn-js-decision-table-controls.css";
+@import "dmn-js/dist/assets/dmn-js-literal-expression.css";
+// <link rel="stylesheet" href="https://unpkg.com/dmn-js@16.6.2/dist/assets/diagram-js.css">
+//     <link rel="stylesheet" href="https://unpkg.com/dmn-js@16.6.2/dist/assets/dmn-js-shared.css">
+//     <link rel="stylesheet" href="https://unpkg.com/dmn-js@16.6.2/dist/assets/dmn-js-drd.css">
+//     <link rel="stylesheet" href="https://unpkg.com/dmn-js@16.6.2/dist/assets/dmn-js-decision-table.css">
+//     <link rel="stylesheet" href="https://unpkg.com/dmn-js@16.6.2/dist/assets/dmn-js-decision-table-controls.css">
+//     <link rel="stylesheet" href="https://unpkg.com/dmn-js@16.6.2/dist/assets/dmn-js-literal-expression.css">
+//     <link rel="stylesheet" href="https://unpkg.com/dmn-js@16.6.2/dist/assets/dmn-font/css/dmn.css">
+
+.bjs-powered-by{
+    display: none;
+}
+
+.flow-node-incident {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #54ff3d;
+    color: White;
+    border-radius: 10px;
+    font-family: Arial;
+    font-size: 12px;
+    font-weight: bold;
+    transform: translateX(-50%);
+  }

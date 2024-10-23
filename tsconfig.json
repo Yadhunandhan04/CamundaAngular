@@ -22,12 +22,19 @@
     "lib": [
       "ES2022",
       "dom"
-    ]
+    ],
+    "typeRoots": ["./index.d.ts"],
+    "noImplicitAny": false,
+    "resolveJsonModule": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "include": ["./index.d.ts"],
+  "noImplicitAny": false,
+  "allowJs": true,
+  "typeRoots":["./index.d.ts"]
 }
